@@ -70,22 +70,22 @@ with c1:
 
         meth_logfc_col = st.selectbox('Methylation diff', list(methylation.columns))
         meth_padj_col = st.selectbox('Methylation padj', list(methylation.columns))
-        meth_logfc = st.number_input('Methylation diff cutoff', 0.1)
-        meth_padj = st.number_input('Methylation padj cutoff', 0.05, min_value=0.0, max_value=1.0)
+        meth_logfc = st.text_input('Methylation diff cutoff', 0.1)
+        meth_padj = st.text_input('Methylation padj cutoff', 0.05)
 with c2:
     if rna is not None:
         rna = pd.read_csv(rna)
         rna_logfc_col = st.selectbox('RNA diff column', list(rna.columns))
         rna_padj_col = st.selectbox('RNA padj column', list(rna.columns))
-        rna_logfc = st.number_input('RNA logFC cutoff', 1.0)
-        rna_padj = st.number_input('RNA padj cutoff', 0.05, min_value=0.0, max_value=1.0)
+        rna_logfc = st.text_input('RNA logFC cutoff', 1.0)
+        rna_padj = st.text_input('RNA padj cutoff', 0.05)
 with c3:
     if protein is not None:
         protein = pd.read_csv(protein)
         prot_logfc_col = st.selectbox('Protein diff column', list(protein.columns))
         prot_padj_col = st.selectbox('Protein padj column', list(protein.columns))
-        prot_logfc = st.number_input('Protein logFC cutoff', 0.5)
-        prot_padj_cutoff = st.number_input('Protein padj cutoff', 0.05, min_value=0.0, max_value=1.0)
+        prot_logfc = st.text_input('Protein logFC cutoff', 0.5)
+        prot_padj_cutoff = st.text_input('Protein padj cutoff', 0.05)
 
 padd3, c0, padd4 = st.columns([1, 6, 1])
 
@@ -109,11 +109,10 @@ def rcm_runner():
 
     rcm.run()
     df = rcm.get_df()
-    st.stop()
 
     download_button(
         df,
-        "File.csv",
+        "SiRCle.csv",
         "Download SiRCle clustering to CSV",
     )
 
@@ -149,8 +148,7 @@ def run_run():
 with c0:
     if methylation is not None and rna is not None and protein is not None:
         gene_id = st.selectbox('Gene identifier', list(set(methylation.columns) & set(rna.columns) & set(protein.columns)))
-        st.button('Run RCM!', key=None, help=None, on_click=run_run, args=None, kwargs=None, *, type="secondary",
-                  disabled=False)
+        st.button('Run RCM!', on_click=run_run)
 
     else:
         st.info(
