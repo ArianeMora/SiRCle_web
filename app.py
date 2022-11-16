@@ -70,45 +70,37 @@ with c1:
 
         meth_logfc_col = st.selectbox('Methylation diff', list(methylation.columns))
         meth_padj_col = st.selectbox('Methylation padj', list(methylation.columns))
-        meth_logfc = st.text_area('Methylation diff cutoff', 0.1)
-        meth_padj = st.text_area('Methylation padj cutoff', 0.05)
+        meth_logfc = st.number_input('Methylation diff cutoff', 0.1)
+        meth_padj = st.number_input('Methylation padj cutoff', 0.05, min_value=0.0, max_value=1.0)
 with c2:
     if rna is not None:
         rna = pd.read_csv(rna)
         rna_logfc_col = st.selectbox('RNA diff column', list(rna.columns))
         rna_padj_col = st.selectbox('RNA padj column', list(rna.columns))
-        rna_logfc = st.text_area('RNA logFC cutoff', 1.0)
-        rna_padj = st.text_area('RNA padj cutoff', 0.05)
+        rna_logfc = st.number_input('RNA logFC cutoff', 1.0)
+        rna_padj = st.number_input('RNA padj cutoff', 0.05, min_value=0.0, max_value=1.0)
 with c3:
     if protein is not None:
         protein = pd.read_csv(protein)
         prot_logfc_col = st.selectbox('Protein diff column', list(protein.columns))
         prot_padj_col = st.selectbox('Protein padj column', list(protein.columns))
-        prot_logfc = st.text_area('Protein logFC cutoff', 0.5)
-        prot_padj = st.text_area('Protein padj cutoff', 0.05)
+        prot_logfc = st.number_input('Protein logFC cutoff', 0.5)
+        prot_padj_cutoff = st.number_input('Protein padj cutoff', 0.05, min_value=0.0, max_value=1.0)
 
 padd3, c0, padd4 = st.columns([1, 6, 1])
 
 def rcm_runner():
     st.info(f'Running SiRCle using your files! Results will appear below shortly.')
 
-    rna_padj_cutoff = 0.05
-    prot_padj_cutoff = 0.05
-    meth_padj_cutoff = 0.05
-
-    rna_logfc_cutoff = 1.0
-    prot_logfc_cutoff = 0.5
-    meth_diff_cutoff = 0.1
-
     rcm = SciRCM(methylation, rna, protein,
-                 "logFC_rna", "padj_rna", "CpG_Beta_diff", "padj_meth", "logFC_protein", "padj_protein",
-                 "external_gene_name", sep=',',
-                 rna_padj_cutoff=rna_padj_cutoff,
-                 prot_padj_cutoff=prot_padj_cutoff,
-                 meth_padj_cutoff=meth_padj_cutoff,
-                 rna_logfc_cutoff=rna_logfc_cutoff,
-                 prot_logfc_cutoff=prot_logfc_cutoff,
-                 meth_diff_cutoff=meth_diff_cutoff,
+                 rna_logfc_col, rna_padj_col, meth_logfc_col, meth_padj_col, prot_logfc_col, prot_padj_col,
+                 gene_id, sep=',',
+                 rna_padj_cutoff=float(rna_padj),
+                 prot_padj_cutoff=float(prot_padj_cutoff),
+                 meth_padj_cutoff=float(meth_padj),
+                 rna_logfc_cutoff=float(rna_logfc),
+                 prot_logfc_cutoff=float(prot_logfc),
+                 meth_diff_cutoff=float(meth_logfc),
                  output_dir='.',
                  non_coding_genes=['None'],
                  output_filename='SiRCLe',
@@ -119,7 +111,7 @@ def rcm_runner():
     df = rcm.get_df()
     st.stop()
 
-    CSVButton = download_button(
+    download_button(
         df,
         "File.csv",
         "Download SiRCle clustering to CSV",
@@ -148,12 +140,18 @@ def rcm_runner():
     st.subheader("Done regulatory clustering! Download your results using the button above.")
 
 
+def run_run():
+    thread = Thread(target=rcm_runner, args=())
+    add_script_run_ctx(thread)
+    thread.start()
+    thread.join()
+
 with c0:
     if methylation is not None and rna is not None and protein is not None:
-        thread = Thread(target=rcm_runner, args=())
-        df = add_script_run_ctx(thread)
-        thread.start()
-        thread.join()
+        gene_id = st.selectbox('Gene identifier', list(set(methylation.columns) & set(rna.columns) & set(protein.columns)))
+        st.button('Run RCM!', key=None, help=None, on_click=run_run, args=None, kwargs=None, *, type="secondary",
+                  disabled=False)
+
     else:
         st.info(
             f"""
