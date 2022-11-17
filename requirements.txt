@@ -5,4 +5,4 @@ seaborn
 pandas
 matplotlib
 sciviso
-sircle
+sircle>=0.0.4

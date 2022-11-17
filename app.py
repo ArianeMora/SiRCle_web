@@ -40,6 +40,7 @@ def _max_width_():
 
 st.title("Signature Regulatory Clustering Model")
 
+background_method = st.text_input('Background Method', '(P&M)|(P&R)|(M&R)')
 c1, c2, c3 = st.columns([4, 4, 4])
 
 df = None
@@ -104,7 +105,7 @@ def rcm_runner():
                  output_dir='.',
                  non_coding_genes=['None'],
                  output_filename='SiRCLe',
-                 bg_type='(P&M)|(P&R)|(M&R)'
+                 bg_type=background_method
              )
 
     rcm.run()
@@ -118,7 +119,8 @@ def rcm_runner():
 
     plot_df = df[df['Regulation_Grouping_2'] != 'None']
     sk = Sankeyplot(plot_df)
-    fig = sk.plot(columns=['Methylation', 'RNA', 'Protein', 'Regulation_Grouping_2'], colour_col='Protein')
+    fig = sk.plot(columns=['Methylation', 'RNA', 'Protein', 'Regulation_Grouping_2',
+                           'Regulation_Grouping_2_filtered'], colour_col='Protein')
     st.plotly_chart(fig)
     plot_bar = False
     if plot_bar:
