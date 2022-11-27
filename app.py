@@ -38,9 +38,9 @@ def _max_width_():
 #     width=100,
 # )
 
-st.title("Signature Regulatory Clustering Model")
+st.title("Signature Regulatory Clustering Model (Beta mode)")
 
-background_method = st.text_input('Background Method', '(P&M)|(P&R)|(M&R)')
+background_method = st.text_input('Background Method', 'P&R')
 c1, c2, c3 = st.columns([4, 4, 4])
 
 df = None
