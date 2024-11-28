@@ -2,7 +2,9 @@
 
 Web app for the first half of SiRCle (i.e. the regulatory clustering). Try the [website](https://arianemora-sircle-web-app-ndu996.streamlit.app/).
 
-Test it out with the [data](data/) in the data folder. Use the columns in the screenshot below.
+Test it out with the [data](data/) in the data folder. Use the columns in the screenshot below. 
+
+Once you have your figures you can download the csv results by clicking on the `Download SiRCle clustering to CSV` button.
 
 ### Upload with data from the paper looks like:
 ![upload](images/upload_test.png)
@@ -10,7 +12,9 @@ Test it out with the [data](data/) in the data folder. Use the columns in the sc
 ### Results from the paper looks like:
 ![upload](images/results_test.png)
 
-Please provide feedback! Let me know if you would like to see the second part (i.e. the variational auto encoder incoperated into this!)
+### Please provide feedback
+
+Let me know if you would like to see the second part (i.e. the variational auto encoder incoperated into this!)
 Leave a feature request in the issues or send me an email at ariane.n.mora@gmail.com. 
 
 ### Upload with data from the paper looks like:
