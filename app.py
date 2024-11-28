@@ -33,6 +33,8 @@ def _max_width_():
     )
 
 st.title("Signature Regulatory Clustering Model (Beta mode)")
+st.subheader("For help go to:")
+st.markdown("[Visit the SiRCle web help page](https://github.com/ArianeMora/SiRCle_web)")
 
 background_method = st.text_input('Background Method', 'P|(M&R)')
 c1, c2, c3 = st.columns([4, 4, 4])
