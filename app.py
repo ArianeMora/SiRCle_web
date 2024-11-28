@@ -2,10 +2,11 @@ import streamlit as st
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-from sircle import SciRCM
+from scircm import SciRCM
 from matplotlib import rcParams
 from threading import Thread
 from sciviso import Sankeyplot
+import plotly.express as px
 
 ###################################
 from streamlit.runtime.scriptrunner import add_script_run_ctx
@@ -30,13 +31,6 @@ def _max_width_():
     """,
         unsafe_allow_html=True,
     )
-
-#st.set_page_config(page_icon="✂️", page_title="SiRCle")
-
-# st.image(
-#     "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/240/apple/285/scissors_2702-fe0f.png",
-#     width=100,
-# )
 
 st.title("Signature Regulatory Clustering Model (Beta mode)")
 
@@ -111,41 +105,61 @@ def rcm_runner():
     rcm.run()
     df = rcm.get_df()
 
+    # Reduce the size by removing the background data
+    plot_df = df[df['RG2_Changes_filtered'] != 'None']
+    plot_df = plot_df[plot_df['RG2_Changes_filtered'] != 'Not-Background']
+    plot_df = plot_df[plot_df['RG2_Changes_filtered'] != '']
+    plot_df = plot_df[plot_df['RG2_Changes_filtered'] != None]
+
     download_button(
-        df,
+        plot_df,
         "SiRCle.csv",
         "Download SiRCle clustering to CSV",
     )
 
-    plot_df = df[df['Regulation_Grouping_2'] != 'None']
     sk = Sankeyplot(plot_df)
-    fig = sk.plot(columns=['Methylation', 'RNA', 'Protein', 'Regulation_Grouping_2',
-                           'Regulation_Grouping_2_filtered'], colour_col='Protein')
+    fig = sk.plot(columns=['Methylation', 'RNA', 'Protein', 'RG2_Changes',
+                           'RG2_Changes_filtered'], colour_col='Protein')
     st.plotly_chart(fig)
-    plot_bar = False
-    if plot_bar:
-        # # figure size in inches
-        rcParams['figure.figsize'] = 3, 2
-        sns.set(rc={'figure.figsize': (3, 2)}, style='ticks')
 
-        colour_map = {'MDS': '#d8419b', 'MDS_TMDE': '#e585c0', 'MDS_ncRNA': '#d880b4',
-                      'MDE': '#6aaf44', 'MDE_TMDS': '#0e8e6d', 'MDE_ncRNA': '#9edb77',
-                      'TMDE': '#fe2323', 'TMDS': '#2952ff',
-                      'TPDE': '#e68e25', 'TPDE_TMDS': '#844c0f',
-                      'TPDS': '#462d76', 'TPDS_TMDE': '#9b29b7'}
+    # Define the color map
+    colour_map = {
+        'MDS': '#d8419b', 'MDS_TMDE': '#e585c0', 'MDS_ncRNA': '#d880b4',
+        'MDE': '#6aaf44', 'MDE_TMDS': '#0e8e6d', 'MDE_ncRNA': '#9edb77',
+        'TMDE': '#fe2323', 'TMDS': '#2952ff',
+        'TPDE': '#e68e25', 'TPDE_TMDS': '#844c0f',
+        'TPDS': '#462d76', 'TPDS_TMDE': '#9b29b7'
+    }
 
-        sns.set_palette("Greys_r")
-        rcm_labels = ["MDS", "MDS_TMDE", "MDE", "MDE_TMDS", "TMDE", "TMDS", "TPDE", "TPDE_TMDS", "TPDS", "TPDS_TMDE"]
-        colours = [colour_map[c] for c in rcm_labels]
+    # Order of labels
+    rcm_labels = ["MDS", "MDS_TMDE", "MDE", "MDE_TMDS", "TMDE", "TMDS", "TPDE", "TPDE_TMDS", "TPDS", "TPDS_TMDE"]
+    colours = [colour_map[label] for label in rcm_labels]
 
-        g = sns.catplot(data=df, x='Regulation_Grouping_2', kind="count", order=rcm_labels,
-                        palette=sns.color_palette(colours),
-                        height=4)
-        plt.xticks(rotation=45, ha='right')
-        plt.title(f'Regulation_Grouping_2')
-        st.pyplot(plt.gcf())
+    # Create the Plotly histogram
+    fig = px.histogram(
+        data_frame=plot_df,
+        x='RG2_Changes_filtered',
+        title='SiRCle group: RG2_Changes_filtered',
+        category_orders={'RG2_Changes_filtered': rcm_labels},
+        color_discrete_sequence=colours
+    )
 
+    # Customize layout
+    fig.update_layout(
+        xaxis_title=None,
+        yaxis_title="Count",
+        xaxis_tickangle=45,
+        title_x=0.5,
+        height=400
+    )
+
+    # Streamlit app
+    st.title("SiRCle Groups Visualization")
+    st.plotly_chart(fig, use_container_width=True)
+
+    # No
     st.subheader("Done regulatory clustering! Download your results using the button above.")
+
 
 
 def run_run():
